@@ -1,0 +1,48 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  schedule:
+  - cron: "0 0 1 * *"
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ['3.7', '3.8']
+        os: [macos-latest, ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Symlink gfortran (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        # make sure gfortran is available
+        # https://github.com/actions/virtual-environments/issues/2524
+        # https://github.com/cbg-ethz/dce/blob/master/.github/workflows/pkgdown.yaml
+        sudo ln -s /usr/local/bin/gfortran-10 /usr/local/bin/gfortran
+        sudo mkdir /usr/local/gfortran
+        sudo ln -s /usr/local/Cellar/gcc@10/*/lib/gcc/10 /usr/local/gfortran/lib
+        gfortran --version
+    - name: Install dependencies
+      run: |
+        # prerequisites
+        python -m pip install --upgrade pip wheel
+        python -m pip install flake8 pytest
+        # install dependencies
+    - name: List installed packages
+      run: |
+        pip freeze
+    - name: Test with pytest
+      run: |
+        pytest tests
+    - name: Lint with flake8
+      run: |
+        flake8 .
