@@ -1,4 +1,9 @@
 
+# The original codebase for this package has been refactored from the
+# temul-toolkit==0.1.3 (https://github.com/PinkShnack/TEMUL) and has been
+# copied using the same GPLv3 license.
+
+
 from .fft_mapping import (
     choose_mask_coordinates, get_masked_ifft,
 )
